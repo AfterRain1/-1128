@@ -100,7 +100,7 @@ export class DeviceConfigService {
    * Fetch device configuration.
    * Mirrors: await service.getDeviceConfig()
    */
-  async getDeviceConfig(): Promise<DeviceConfigResponse> {
+  async getDeviceConfig(): Promise<{ ok: boolean; value?: DeviceConfigResponse; error?: any }> {
     console.log(`[MockService] Fetching config for device: ${this.deviceCode} from ${this.baseUrl}`);
     
     // Simulate network delay
@@ -109,7 +109,10 @@ export class DeviceConfigService {
     // Note: Since we don't have the real library installed in this preview,
     // we return mock data that matches the expected structure.
     return {
-      uistyle: this.generateMockData()
+      ok: true,
+      value: {
+        uistyle: this.generateMockData()
+      }
     };
   }
 

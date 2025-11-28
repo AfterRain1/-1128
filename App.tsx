@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { DeviceConfigService } from 'pepefoto-bridge-lib/platform/auth';
+import {
+  DeviceConfigService,
+} from 'pepefoto-bridge-lib/platform/auth';
 import { DeviceConfigResponse, UIStyleCategory, StyleItem } from './types';
 import { StyleDetailsModal } from './components/StyleDetailsModal';
 import { LayoutGrid, Sparkles, Image as ImageIcon, Zap, Search, Settings, Monitor, Wifi } from 'lucide-react';
 
-// Note: DeviceConfigService is mocked via importmap in index.html for this preview environment.
-// In a real build, it resolves to the actual 'pepefoto-bridge-lib' package.
-// We need to access the static helper from the mock class implementation if we are in mock mode,
-// but TS treats it as the real library type.
-// For the purpose of this preview UI, we assume the service has the helper or we access env directly.
-// To keep TS happy with the real lib import which might not have 'getEnv' exposed statically:
+// Helper to safely access env vars since we might be in a preview environment
+// where the real library isn't fully set up or we need to access our mock's static helpers.
 const getEnvSafe = (key: string) => {
-  // @ts-ignore - The mock implementation has this helper, but the real lib might not.
+  // Check if we are using the mocked service which exposes getEnv
+  // @ts-ignore
   if (typeof DeviceConfigService.getEnv === 'function') {
      // @ts-ignore
     return DeviceConfigService.getEnv(key);
   }
   
-  // Fallback if using real lib which doesn't have getEnv helper
+  // Fallback for standard Vite/Web environment
   try {
     // @ts-ignore
     return import.meta.env[key] || '';
@@ -49,9 +48,13 @@ const App: React.FC = () => {
     // 2. Fetch Configuration
     service.getDeviceConfig()
       .then((result) => {
-        setConfig(result);
-        if (result.uistyle.length > 0) {
-          setSelectedCategory(result.uistyle[0].id);
+        if (result.ok) {
+          setConfig(result.value);
+          if (result.value.uistyle.length > 0) {
+            setSelectedCategory(result.value.uistyle[0].id);
+          }
+        } else {
+          console.error("Failed to load device config:", result.error);
         }
       })
       .catch(err => console.error("Failed to load device config", err))
