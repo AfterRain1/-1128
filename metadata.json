@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Device Config Viewer",
+  "description": "A visual interface to explore device UI styles and configurations based on the gemini-bridge-lib data structure.",
+  "requestFramePermissions": []
+}
